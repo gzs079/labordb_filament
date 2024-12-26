@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('samplers', function (Blueprint $table) {
             $table->id();
             $table->string('sampler', length:10);
-            $table->string('accreditation_number', length:150);
+            $table->string('accreditation_number', length:20);
             $table->string('name', length:150);
             $table->string('address', length:150);
             $table->date('valid_starts')->default('1900-01-01');
