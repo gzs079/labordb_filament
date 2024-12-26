@@ -4,11 +4,21 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\SampleResource\Pages;
 use App\Filament\Resources\SampleResource\RelationManagers;
+use App\Models\Humvimodule;
+use App\Models\Laboratory;
 use App\Models\Sample;
+use App\Models\Samplingreason;
+use App\Models\Samplingsite;
 use Filament\Forms;
+use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\BooleanFilter;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -188,6 +198,15 @@ class SampleResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('samplingsite.name_laboratory')->label(__('fields.samplingsite_id'))
                     ->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('samplingsite.aquifer')->label(__('fields.aquifer'))
+                    ->searchable()->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('samplingsite.settlement')->label(__('fields.settlement'))
+                    ->searchable()->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('samplingsite.type')->label(__('fields.type'))
+                    ->searchable()->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('sampling_site_details')->label(__('fields.sampling_site_details'))
                     ->searchable()->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -207,8 +226,176 @@ class SampleResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
-            ])
+//PROBLÉMA: szűrők elrendezése nem jó, javítani kellene
+//PROBLÉMA szűrő ikon feletti kis szám nem szűrők számát mutatja
+                //HUMVI EXPORT SZŰRŐ
+                SelectFilter::make('humvi_export')
+                    ->label(__('Active Status'))
+                    ->options([
+                        1 => __('Aktív'),
+                        0 => __('Inaktív'),
+                    ])
+                    ->placeholder(__('Összes')),
+
+                //MINTAVÉTEL DÁTUMA SZŰRŐ
+                SelectFilter::make('date_sampling')
+                ->form([
+                    DatePicker::make('sampled_from')->label(__('fields.date_sampling_from')),
+                    DatePicker::make('sampled_until')->label(__('fields.date_sampling_until')),
+                ])
+                ->query(function (Builder $query, array $data): Builder {
+                    return $query
+                        ->when(
+                            $data['sampled_from'],
+                            fn (Builder $query, $date): Builder => $query->whereDate('date_sampling', '>=', $date),
+                        )
+                        ->when(
+                            $data['sampled_until'],
+                            fn (Builder $query, $date): Builder => $query->whereDate('date_sampling', '<=', $date),
+                        );
+                }),
+                //IVÓVÍZBÁZIS SZŰRŐ
+                SelectFilter::make('aquifer')
+                ->form([
+                    Select::make('aquifer')
+                        ->label(__('fields.aquifer'))
+                        ->options(function () {
+                            return Samplingsite::all()->pluck('aquifer', 'aquifer')->unique()->sortBy(function ($item) {
+                                return $item;
+                            });
+                        })
+                        ->multiple()
+                        ->getOptionLabelUsing(fn (Samplingsite $record) => $record->aquifer),
+                ])
+                ->query(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                        $data['aquifer'] ?? null,
+                        fn (Builder $query, $values): Builder => $query->whereHas('samplingsite', function (Builder $query) use ($values) {
+                            $query->whereIn('aquifer', $values);
+                        })
+                    );
+                }),
+                //TELEPÜLÉS SZŰRŐ
+                SelectFilter::make('settlement')
+                ->form([
+                    Select::make('settlement')
+                        ->label(__('fields.settlement'))
+/*  PROBLÉMA: PRÓBA település LISTA SZŰKÍTÉSÉRE, de dd($aquifer) -> null, szóval nem működik
+                        ->options(function (callable $get) {
+                            $query = Samplingsite::query();
+                            $aquifer = $get('aquifer_filter');
+                            if (!empty($data['aquifer'])) {
+                                $query->whereIn('aquifer', $aquifer);
+                            }
+
+                            return $query->pluck('settlement', 'settlement')->unique()->sortBy(function ($item) {
+                                return $item;
+                            });
+                        })
+*/
+                        ->options(function () {
+                            return Samplingsite::all()->pluck('settlement', 'settlement')->unique()->sortBy(function ($item) {
+                                return $item;
+                            });
+                        })
+                        ->multiple()
+                        ->getOptionLabelUsing(fn (Samplingsite $record) => $record->settlement),
+                ])
+                ->query(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                        $data['settlement'] ?? null,
+                        fn (Builder $query, $values): Builder => $query->whereHas('samplingsite', function (Builder $query) use ($values) {
+                            $query->whereIn('settlement', $values);
+                        })
+                    );
+                }),
+                //MINTAVÉTEL HELYE SZŰRŐ
+                SelectFilter::make('samplingsite')
+                ->form([
+                    Select::make('samplingsite')
+                        ->label(__('fields.samplingsite_id'))
+                        ->options(function () {
+                            return Samplingsite::all()->pluck('name_laboratory', 'name_laboratory')->unique()->sortBy(function ($item) {
+                                return $item;
+                            });
+                        })
+                        ->multiple()
+                        ->getOptionLabelUsing(fn (Samplingsite $record) => $record->name_laboratory)
+                ])
+                ->query(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                        $data['samplingsite'] ?? null,
+                        fn (Builder $query, $values): Builder => $query->whereHas('samplingsite', function (Builder $query) use ($values) {
+                            $query->whereIn('name_laboratory', $values);
+                        })
+                    );
+                }),
+                //MODUL SZŰRŐ
+                SelectFilter::make('modul')
+                ->form([
+                    Select::make('modul')
+                        ->label(__('fields.humvimodule_id'))
+                        ->options(function () {
+                            return Humvimodule::all()->pluck('modul', 'modul')->unique()->sortBy(function ($item) {
+                                return $item;
+                            });
+                        })
+                        ->multiple()
+                        ->getOptionLabelUsing(fn (Samplingsite $record) => $record->modul)
+                ])
+                ->query(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                        $data['modul'] ?? null,
+                        fn (Builder $query, $values): Builder => $query->whereHas('humvimodule', function (Builder $query) use ($values) {
+                            $query->whereIn('modul', $values);
+                        })
+                    );
+                }),
+                //MINTAVÉTEL OKA SZŰRŐ
+                SelectFilter::make('samplingreason')
+                ->form([
+                    Select::make('samplingreason')
+                        ->label(__('fields.samplingreason_id'))
+                        ->options(function () {
+                            return Samplingreason::all()->pluck('reason', 'reason')->unique()->sortBy(function ($item) {
+                                return $item;
+                            });
+                        })
+                        ->multiple()
+                        ->getOptionLabelUsing(fn (Samplingreason $record) => $record->reason)
+                ])
+                ->query(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                        $data['samplingreason'] ?? null,
+                        fn (Builder $query, $values): Builder => $query->whereHas('samplingreason', function (Builder $query) use ($values) {
+                            $query->whereIn('reason', $values);
+                        })
+                    );
+                }),
+                //VIZSGÁLÓLABOR SZŰRŐ
+                SelectFilter::make('laboratory')
+                ->form([
+                    Select::make('laboratory')
+                        ->label(__('fields.laboratory_id'))
+                        ->options(function () {
+                            return Laboratory::all()->pluck('name', 'name')->unique()->sortBy(function ($item) {
+                                return $item;
+                            });
+                        })
+                        ->multiple()
+                        ->getOptionLabelUsing(fn (Samplingreason $record) => $record->laboratory)
+                ])
+                ->query(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                        $data['laboratory'] ?? null,
+                        fn (Builder $query, $values): Builder => $query->whereHas('laboratory', function (Builder $query) use ($values) {
+                            $query->whereIn('name', $values);
+                        })
+                    );
+                }),
+            ] , layout: FiltersLayout::AboveContentCollapsible)
+//PROBLÉMA: hiddenFilterIndicators(false) esetén vagy ha nincs megadva, akkor csak
+                ->hiddenFilterIndicators()
             ->actions([
                 Tables\Actions\ViewAction::make()
                     ->iconButton(),
