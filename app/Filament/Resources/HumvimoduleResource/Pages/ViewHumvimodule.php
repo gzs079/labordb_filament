@@ -9,4 +9,9 @@ use Filament\Resources\Pages\ViewRecord;
 class ViewHumvimodule extends ViewRecord
 {
     protected static string $resource = HumvimoduleResource::class;
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

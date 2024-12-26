@@ -96,7 +96,7 @@ class AccreditedsamplingstatusResource extends Resource
     {
         return [
             'index' => Pages\ListAccreditedsamplingstatuses::route('/'),
-            'create' => Pages\CreateAccreditedsamplingstatus::route('/create'),
+//            'create' => Pages\CreateAccreditedsamplingstatus::route('/create'),
         ];
     }
 }

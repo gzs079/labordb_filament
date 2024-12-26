@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\HumvimoduleResource\Pages;
-use App\Filament\Resources\HumvimoduleResource\RelationManagers;
-use App\Models\Humvimodule;
+use App\Filament\Resources\ParameterResource\Pages;
+use App\Filament\Resources\ParameterResource\RelationManagers;
+use App\Models\Parameter;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -13,41 +13,46 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class HumvimoduleResource extends Resource
+class ParameterResource extends Resource
 {
-    protected static ?string $model = Humvimodule::class;
+    protected static ?string $model = Parameter::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function getNavigationGroup(): string
     {
-    return __('module_names.navigation_groups.administration');
+        return __('module_names.navigation_groups.administration');
     }
 
     public static function getModelLabel(): string
     {
-    return __('module_names.humvimodule.label');
+       return __('module_names.parameter.label');
     }
 
     public static function getPluralModelLabel(): string
     {
-    return __('module_names.humvimodule.plural_label');
+       return __('module_names.parameter.plural_label');
     }
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Section::make()
-                ->schema([
-                  Forms\Components\TextInput::make('modul')->label(__('fields.modul'))
+                Forms\Components\TextInput::make('par_code')->label(__('fields.par_code'))
                     ->required()
                     ->unique(ignoreRecord: true)
-                    ->maxLength(10),
-                  Forms\Components\TextInput::make('description')->label(__('fields.description'))
-                    ->maxLength(50),
-                ])
-            ]);
+                    ->maxLength(25),
+                Forms\Components\TextInput::make('description_humvi')->label(__('fields.description_humvi'))
+                    ->required()
+                    ->maxLength(75),
+                Forms\Components\TextInput::make('description_labor')->label(__('fields.description_labor'))
+                    ->required()
+                    ->maxLength(75),
+                Forms\Components\TextInput::make('parametric_value')->label(__('fields.parametric_value'))
+                    ->maxLength(75),
+                Forms\Components\TextInput::make('parametric_value_type')->label(__('fields.parametric_value_type'))
+                    ->maxLength(25),
+            ])->columns(1);
     }
 
     public static function table(Table $table): Table
@@ -56,9 +61,15 @@ class HumvimoduleResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('modul')->label(__('fields.modul'))
+                Tables\Columns\TextColumn::make('par_code')->label(__('fields.par_code'))
                     ->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('description')->label(__('fields.description'))
+                Tables\Columns\TextColumn::make('description_humvi')->label(__('fields.description_humvi'))
+                    ->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('description_labor')->label(__('fields.description_labor'))
+                    ->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('parametric_value')->label(__('fields.parametric_value'))
+                    ->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('parametric_value_type')->label(__('fields.parametric_value_type'))
                     ->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('created_at')->label(__('fields.created_at'))
                     ->dateTime('Y-m-d H:i')
@@ -95,8 +106,9 @@ class HumvimoduleResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListHumvimodules::route('/'),
-//            'create' => Pages\CreateHumvimodule::route('/create'),
+            'index' => Pages\ListParameters::route('/'),
+//            'create' => Pages\CreateParameter::route('/create'),
+//            'edit' => Pages\EditParameter::route('/{record}/edit'),
         ];
     }
 }

@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\HumvimoduleResource\Pages;
-use App\Filament\Resources\HumvimoduleResource\RelationManagers;
-use App\Models\Humvimodule;
+use App\Filament\Resources\SamplingtypeResource\Pages;
+use App\Filament\Resources\SamplingtypeResource\RelationManagers;
+use App\Models\Samplingtype;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -13,25 +13,25 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class HumvimoduleResource extends Resource
+class SamplingtypeResource extends Resource
 {
-    protected static ?string $model = Humvimodule::class;
+    protected static ?string $model = Samplingtype::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function getNavigationGroup(): string
-    {
-    return __('module_names.navigation_groups.administration');
-    }
+        {
+        return __('module_names.navigation_groups.administration');
+        }
 
     public static function getModelLabel(): string
     {
-    return __('module_names.humvimodule.label');
+        return __('module_names.samplingtype.label');
     }
 
     public static function getPluralModelLabel(): string
     {
-    return __('module_names.humvimodule.plural_label');
+        return __('module_names.samplingtype.plural_label');
     }
 
     public static function form(Form $form): Form
@@ -40,7 +40,7 @@ class HumvimoduleResource extends Resource
             ->schema([
                 Forms\Components\Section::make()
                 ->schema([
-                  Forms\Components\TextInput::make('modul')->label(__('fields.modul'))
+                  Forms\Components\TextInput::make('type')->label(__('fields.type'))
                     ->required()
                     ->unique(ignoreRecord: true)
                     ->maxLength(10),
@@ -56,7 +56,7 @@ class HumvimoduleResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('modul')->label(__('fields.modul'))
+                Tables\Columns\TextColumn::make('type')->label(__('fields.type'))
                     ->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('description')->label(__('fields.description'))
                     ->searchable()->sortable(),
@@ -95,8 +95,8 @@ class HumvimoduleResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListHumvimodules::route('/'),
-//            'create' => Pages\CreateHumvimodule::route('/create'),
+            'index' => Pages\ListSamplingtypes::route('/'),
+            //'create' => Pages\CreateSamplingtype::route('/create'),
         ];
     }
 }

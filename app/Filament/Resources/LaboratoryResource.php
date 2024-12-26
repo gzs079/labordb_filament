@@ -2,9 +2,9 @@
 
 namespace App\Filament\Resources;
 
-use App\Filament\Resources\HumviresponsibleResource\Pages;
-use App\Filament\Resources\HumviresponsibleResource\RelationManagers;
-use App\Models\Humviresponsible;
+use App\Filament\Resources\LaboratoryResource\Pages;
+use App\Filament\Resources\LaboratoryResource\RelationManagers;
+use App\Models\Laboratory;
 use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -13,45 +13,50 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
-class HumviresponsibleResource extends Resource
+class LaboratoryResource extends Resource
 {
-    protected static ?string $model = Humviresponsible::class;
+    protected static ?string $model = Laboratory::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
     public static function getNavigationGroup(): string
     {
-    return __('module_names.navigation_groups.administration');
+        return __('module_names.navigation_groups.administration');
     }
 
     public static function getModelLabel(): string
     {
-    return __('module_names.humviresponsible.label');
+        return __('module_names.laboratory.label');
     }
 
     public static function getPluralModelLabel(): string
     {
-    return __('module_names.humviresponsible.plural_label');
+        return __('module_names.laboratory.plural_label');
     }
 
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Forms\Components\Section::make()
-                ->schema([
-                    Forms\Components\TextInput::make('responsible')->label(__('fields.responsible'))
-                        ->required()
-                        ->unique(ignoreRecord: true)
-                        ->maxLength(10),
-                    Forms\Components\TextInput::make('name')->label(__('fields.name'))
-                        ->required()
-                        ->maxLength(50),
-                    Forms\Components\TextInput::make('address')->label(__('fields.address'))
-                        ->required()
-                        ->maxLength(50),
-                ])
-            ]);
+                Forms\Components\TextInput::make('laboratory')->label(__('fields.laboratory'))
+                    ->required()
+                    ->maxLength(10),
+                Forms\Components\TextInput::make('accreditation_number')->label(__('fields.accreditation_number'))
+                    ->required()
+                    ->maxLength(20),
+                Forms\Components\TextInput::make('name')->label(__('fields.name'))
+                    ->required()
+                    ->maxLength(150),
+                Forms\Components\TextInput::make('address')->label(__('fields.address'))
+                    ->required()
+                    ->maxLength(150),
+                Forms\Components\DatePicker::make('valid_starts')->label(__('fields.valid_starts'))
+                    ->required()
+                    ->format('Y-m-d'),
+                Forms\Components\DatePicker::make('valid_ends')->label(__('fields.valid_ends'))
+                    ->required()
+                    ->format('Y-m-d'),
+            ])->columns(1);
     }
 
     public static function table(Table $table): Table
@@ -60,11 +65,19 @@ class HumviresponsibleResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('id')
                     ->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('responsible')->label(__('fields.responsible'))
+                Tables\Columns\TextColumn::make('laboratory')->label(__('fields.laboratory'))
+                    ->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('accreditation_number')->label(__('fields.accreditation_number'))
                     ->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('name')->label(__('fields.name'))
                     ->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('address')->label(__('fields.address'))
+                    ->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('valid_starts')->label(__('fields.valid_starts'))
+                    ->dateTime('Y-m-d')
+                    ->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('valid_ends')->label(__('fields.valid_ends'))
+                    ->dateTime('Y-m-d')
                     ->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('created_at')->label(__('fields.created_at'))
                     ->dateTime('Y-m-d H:i')
@@ -101,9 +114,9 @@ class HumviresponsibleResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListHumviresponsibles::route('/'),
-//            'create' => Pages\CreateHumviresponsible::route('/create'),
-//            'edit' => Pages\EditHumviresponsible::route('/{record}/edit'),
+            'index' => Pages\ListLaboratories::route('/'),
+//            'create' => Pages\CreateLaboratory::route('/create'),
+//            'edit' => Pages\EditLaboratory::route('/{record}/edit'),
         ];
     }
 }
