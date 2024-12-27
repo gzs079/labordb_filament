@@ -162,7 +162,7 @@ class SampleResource extends Resource
                 Tables\Columns\TextColumn::make('id')
                     ->searchable()->sortable(),
                 Tables\Columns\CheckboxColumn::make('humvi_export')->label(__('fields.humvi_export'))
-                    ->searchable()->sortable(),
+                    ->searchable()->sortable()->disabled(),
                 Tables\Columns\TextColumn::make('sample_lab_id')->label(__('fields.sample_lab_id'))
                     ->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('humvimodule.modul')->label(__('fields.humvimodule_id'))
@@ -414,7 +414,7 @@ class SampleResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\ResultsRelationManager::class,
         ];
     }
 
@@ -423,8 +423,8 @@ class SampleResource extends Resource
         return [
             'index' => Pages\ListSamples::route('/'),
 //            'create' => Pages\CreateSample::route('/create'),
-//            'view' => Pages\ViewSample::route('/{record}'),
-//            'edit' => Pages\EditSample::route('/{record}/edit'),
+            'view' => Pages\ViewSample::route('/{record}'),
+            'edit' => Pages\EditSample::route('/{record}/edit'),
         ];
     }
 }
