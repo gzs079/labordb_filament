@@ -14,6 +14,9 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Validation\Rules\Unique;
+
+use function PHPUnit\Framework\callback;
 
 class ResultResource extends Resource
 {
@@ -57,6 +60,11 @@ class ResultResource extends Resource
                     ->schema([
                         Forms\Components\Select::make('parameter_id')->label(__('fields.parameter_id'))
                             ->required()
+                            ->unique(modifyRuleUsing: function (Unique $rule, callable $get) {
+                                return $rule
+                                    ->where('sample_id', $get('sample_id'))
+                                    ->where('parameter_id', $get('parameter_id'));
+                            }, ignoreRecord: true)
                             ->relationship('Parameter', 'par_code')
                             ->searchable()
                             ->getOptionLabelFromRecordUsing(fn (Model $record) => "{$record->par_code} - {$record->description_labor}")

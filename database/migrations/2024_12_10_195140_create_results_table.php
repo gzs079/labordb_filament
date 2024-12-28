@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('sample_id')->constrained()->cascadeOnDelete();
             $table->foreignId('parameter_id')->constrained()->restrictOnDelete();
+            $table->unique(['sample_id', 'parameter_id']);
             $table->foreignId('unit_id')->constrained()->restrictOnDelete();
             $table->string('value', length:25);
             $table->float('loq')->nullable();
