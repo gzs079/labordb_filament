@@ -11,6 +11,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class SamplingsiteResource extends Resource
@@ -59,15 +60,30 @@ class SamplingsiteResource extends Resource
 
                 Forms\Components\Section::make()
                     ->schema([
-                        Forms\Components\TextInput::make('aquifer')->label(__('fields.aquifer'))
+                        Forms\Components\Select::make('aquifer_id')->label(__('fields.aquifer'))
                             ->required()
-                            ->maxLength(75),
-                        Forms\Components\TextInput::make('settlement')->label(__('fields.settlement'))
+                            ->relationship('Aquifer', 'aquifer')
+                            ->searchable()
+                            ->preload()
+                            //->createOptionForm(fn(Form $form) => HumvimoduleResource::form($form))
+                            //->editOptionForm(fn(Form $form) => HumvimoduleResource::form($form)),
+                            ,
+                        Forms\Components\Select::make('settlement_id')->label(__('fields.settlement'))
                             ->required()
-                            ->maxLength(75),
-                        Forms\Components\TextInput::make('type')->label(__('fields.type'))
+                            ->relationship('Settlement', 'settlement')
+                            ->searchable()
+                            ->preload()
+                            //->createOptionForm(fn(Form $form) => HumvimoduleResource::form($form))
+                            //->editOptionForm(fn(Form $form) => HumvimoduleResource::form($form)),
+                            ,
+                        Forms\Components\Select::make('samplingsitetype_id')->label(__('fields.type'))
                             ->required()
-                            ->maxLength(75),
+                            ->relationship('Samplingsitetype', 'samplingsitetype')
+                            ->searchable()
+                            ->preload()
+                            //->createOptionForm(fn(Form $form) => HumvimoduleResource::form($form))
+                            //->editOptionForm(fn(Form $form) => HumvimoduleResource::form($form)),
+                            ,
                     ])->columns(3),
 
                 Forms\Components\Section::make()
@@ -102,11 +118,11 @@ class SamplingsiteResource extends Resource
                 Tables\Columns\TextColumn::make('name_humvi_old')->label(__('fields.name_humvi_old'))
                     ->searchable()->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('aquifer')->label(__('fields.aquifer'))
+                Tables\Columns\TextColumn::make('aquifer.aquifer')->label(__('fields.aquifer'))
                     ->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('settlement')->label(__('fields.settlement'))
+                Tables\Columns\TextColumn::make('settlement.settlement')->label(__('fields.settlement'))
                     ->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('type')->label(__('fields.type'))
+                Tables\Columns\TextColumn::make('samplingsitetype.samplingsitetype')->label(__('fields.type'))
                     ->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('GPS_N_Y')->label(__('fields.GPS_N_Y'))
                     ->searchable()->sortable(),
