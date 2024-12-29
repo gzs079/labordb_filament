@@ -4,11 +4,13 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\SampleResource\Pages;
 use App\Filament\Resources\SampleResource\RelationManagers;
+use App\Models\Aquifer;
 use App\Models\Humvimodule;
 use App\Models\Laboratory;
 use App\Models\Sample;
 use App\Models\Samplingreason;
 use App\Models\Samplingsite;
+use App\Models\Settlement;
 use Filament\Forms;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
@@ -198,13 +200,13 @@ class SampleResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('samplingsite.name_laboratory')->label(__('fields.samplingsite_id'))
                     ->searchable()->sortable(),
-                Tables\Columns\TextColumn::make('samplingsite.aquifer')->label(__('fields.aquifer'))
+                Tables\Columns\TextColumn::make('samplingsite.aquifer.aquifer')->label(__('fields.aquifer'))
                     ->searchable()->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('samplingsite.settlement')->label(__('fields.settlement'))
+                Tables\Columns\TextColumn::make('samplingsite.settlement.settlement')->label(__('fields.settlement'))
                     ->searchable()->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                Tables\Columns\TextColumn::make('samplingsite.type')->label(__('fields.type'))
+                Tables\Columns\TextColumn::make('samplingsite.samplingsitetype.samplingsitetype')->label(__('fields.type'))
                     ->searchable()->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('sampling_site_details')->label(__('fields.sampling_site_details'))
@@ -260,54 +262,48 @@ class SampleResource extends Resource
                     Select::make('aquifer')
                         ->label(__('fields.aquifer'))
                         ->options(function () {
-                            return Samplingsite::all()->pluck('aquifer', 'aquifer')->unique()->sortBy(function ($item) {
-                                return $item;
-                            });
+                            return Aquifer::all()->pluck('aquifer', 'id')->toArray();
                         })
                         ->multiple()
-                        ->getOptionLabelUsing(fn (Samplingsite $record) => $record->aquifer),
+                        ->preload(),
                 ])
-                ->query(function (Builder $query, array $data): Builder {
-                        return $query->when(
-                        $data['aquifer'] ?? null,
-                        fn (Builder $query, $values): Builder => $query->whereHas('samplingsite', function (Builder $query) use ($values) {
-                            $query->whereIn('aquifer', $values);
-                        })
-                    );
+                ->query(function (Builder $query, array $data) {
+                    if (!empty($data['aquifer']))
+                    {
+                        $query->whereHas(
+                            'samplingsite',
+                            fn (Builder $query) => $query->whereHas(
+                                'aquifer',
+                                fn (Builder $query) => $query->whereIn('id', $data['aquifer'])
+                            )
+                        );
+                    }
                 }),
                 //TELEPÜLÉS SZŰRŐ
                 SelectFilter::make('settlement')
                 ->form([
+//  PROBLÉMA:   PRÓBA település LISTA SZŰKÍTÉSÉRE PRÓBÁLKOZÁSOK NEM MŰKÖDTEK.
+//              ADATBÁZIS MÓDOSÍTÁS UTÁN MÁR ADATOK IS HIÁNYOZNAK... gyakorlatban átgondolást igényel, nem biztos hogy működne
+//              (legalább egy település -> több vízbázis)
                     Select::make('settlement')
                         ->label(__('fields.settlement'))
-/*  PROBLÉMA: PRÓBA település LISTA SZŰKÍTÉSÉRE, de dd($aquifer) -> null, szóval nem működik
-                        ->options(function (callable $get) {
-                            $query = Samplingsite::query();
-                            $aquifer = $get('aquifer_filter');
-                            if (!empty($data['aquifer'])) {
-                                $query->whereIn('aquifer', $aquifer);
-                            }
-
-                            return $query->pluck('settlement', 'settlement')->unique()->sortBy(function ($item) {
-                                return $item;
-                            });
-                        })
-*/
                         ->options(function () {
-                            return Samplingsite::all()->pluck('settlement', 'settlement')->unique()->sortBy(function ($item) {
-                                return $item;
-                            });
+                            return Settlement::all()->pluck('settlement', 'id')->toArray();
                         })
                         ->multiple()
-                        ->getOptionLabelUsing(fn (Samplingsite $record) => $record->settlement),
+                        ->preload(),
                 ])
-                ->query(function (Builder $query, array $data): Builder {
-                        return $query->when(
-                        $data['settlement'] ?? null,
-                        fn (Builder $query, $values): Builder => $query->whereHas('samplingsite', function (Builder $query) use ($values) {
-                            $query->whereIn('settlement', $values);
-                        })
-                    );
+                ->query(function (Builder $query, array $data) {
+                    if (!empty($data['settlement']))
+                    {
+                        $query->whereHas(
+                            'samplingsite',
+                            fn (Builder $query) => $query->whereHas(
+                                'settlement',
+                                fn (Builder $query) => $query->whereIn('id', $data['settlement'])
+                            )
+                        );
+                    }
                 }),
                 //MINTAVÉTEL HELYE SZŰRŐ
                 SelectFilter::make('samplingsite')
