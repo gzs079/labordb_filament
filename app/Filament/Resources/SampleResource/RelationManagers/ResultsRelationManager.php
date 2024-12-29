@@ -3,11 +3,15 @@
 namespace App\Filament\Resources\SampleResource\RelationManagers;
 
 use App\Filament\Resources\ResultResource;
+use App\Models\Sample;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Set;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
+use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Actions\CreateAction;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
@@ -37,8 +41,10 @@ class ResultsRelationManager extends RelationManager
 
     public function table(Table $table): Table
     {
-        return ResultResource::table($table);
-/*        return $table
+ //PROBLÉMA:    ResultResource táblázat helyett sajat táblázat
+ //             oka:táblázat felirat + talán oszlopszélesség
+        //       return ResultResource::table($table);
+        return $table
             ->recordTitleAttribute('result_id')
             ->columns([
                 Tables\Columns\TextColumn::make('id')
@@ -71,17 +77,25 @@ class ResultsRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make(),
+//PROBLÉMA: ResultsResource create formot megnyitja, DE
+//         - a sample_id mező szerkeszthető és nem kapja meg szűlő rekord id-jét
+//         - ha nincs kitöltve a mező, akkor validálási hiba
+//         - ha ki van töltve, akkor mindegy mivel, mindenképpen az aktuális szűlő rekord id-jével menti el
+                Tables\Actions\CreateAction::make()
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+//PROBLÉMA: nincs vissza navigációhoz gomb
+                Tables\Actions\ViewAction::make()->iconButton(),
+//PROBLÉMA: ResultsResource edit formot megnyitja, DE
+//         - a sample_id mező szerkeszthető, megkapja szűlő id érétkét, de át is írható. Átírás után új mintához menti eredményt
+                Tables\Actions\EditAction::make()->iconButton(),
+                Tables\Actions\DeleteAction::make()->iconButton(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                 ]),
             ]);
-*/
+
             }
 }
