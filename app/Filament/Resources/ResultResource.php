@@ -3,11 +3,10 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\ResultResource\Pages;
-use App\Filament\Resources\ResultResource\RelationManagers;
 use App\Models\Result;
-use Closure;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -23,6 +22,14 @@ class ResultResource extends Resource
     protected static ?string $model = Result::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+
+    //kiegészítő változó ResourceManager és ResultsRelationManager hívás kezeléséhez
+    protected static $callFrom = null;
+
+    public static function setCallFrom($data)
+    {
+        static::$callFrom = $data;
+    }
 
     public static function getNavigationGroup(): string
     {
@@ -52,6 +59,8 @@ class ResultResource extends Resource
                             ->getOptionLabelFromRecordUsing(fn (Model $record) => "{$record->id} - {$record->sample_lab_id} (Mintavétel: {$record->date_sampling->format('Y-m-d')})")
                             ->preload()
                             ->columnSpan(8)
+                            ->default(static::$callFrom == 'relationManager' ? fn (RelationManager $livewire) => $livewire?->getOwnerRecord()->id : null)
+                            ->disabled($form->getOperation() == 'edit' or static::$callFrom == 'relationManager')
                             ->createOptionForm(fn(Form $form) => SampleResource::form($form))
                             ->editOptionForm(fn(Form $form) => SampleResource::form($form)),
                     ]),

@@ -36,7 +36,8 @@ class ResultsRelationManager extends RelationManager
 
     public function form(Form $form): Form
     {
-        return ResultResource::form($form);
+        ResultResource::setCallFrom('relationManager');
+        return ResultResource::form($form);;
     }
 
     public function table(Table $table): Table
@@ -77,16 +78,10 @@ class ResultsRelationManager extends RelationManager
                 //
             ])
             ->headerActions([
-//PROBLÉMA: ResultsResource create formot megnyitja, DE
-//         - a sample_id mező szerkeszthető és nem kapja meg szűlő rekord id-jét
-//         - ha nincs kitöltve a mező, akkor validálási hiba
-//         - ha ki van töltve, akkor mindegy mivel, mindenképpen az aktuális szűlő rekord id-jével menti el
                 Tables\Actions\CreateAction::make()
             ])
             ->actions([
                 Tables\Actions\ViewAction::make()->iconButton(),
-//PROBLÉMA: ResultsResource edit formot megnyitja, DE
-//         - a sample_id mező szerkeszthető, megkapja szűlő id érétkét, de át is írható. Átírás után új mintához menti eredményt
                 Tables\Actions\EditAction::make()->iconButton(),
                 Tables\Actions\DeleteAction::make()->iconButton(),
             ])
