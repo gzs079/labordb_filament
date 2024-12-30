@@ -4,6 +4,7 @@ namespace App\Filament\Resources\SampleResource\Pages;
 
 use App\Filament\Resources\SampleResource;
 use Filament\Actions;
+use Filament\Actions\Action;
 use Filament\Resources\Pages\ViewRecord;
 
 class ViewSample extends ViewRecord
@@ -14,6 +15,14 @@ class ViewSample extends ViewRecord
     {
         return [
             Actions\EditAction::make(),
+            Action::make('close')
+                ->label(__('other.close'))
+                ->url( function() {
+                    $page = back()->getTargetUrl();
+                    return $page;
+                })
+                ->button()
+                ->color('gray'),
         ];
     }
 

@@ -84,7 +84,6 @@ class ResultsRelationManager extends RelationManager
                 Tables\Actions\CreateAction::make()
             ])
             ->actions([
-//PROBLÉMA: nincs vissza navigációhoz gomb
                 Tables\Actions\ViewAction::make()->iconButton(),
 //PROBLÉMA: ResultsResource edit formot megnyitja, DE
 //         - a sample_id mező szerkeszthető, megkapja szűlő id érétkét, de át is írható. Átírás után új mintához menti eredményt
