@@ -7,10 +7,12 @@ use App\Filament\Resources\ParameterResource\RelationManagers;
 use App\Models\Parameter;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class ParameterResource extends Resource
@@ -73,10 +75,12 @@ class ParameterResource extends Resource
                     ->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('created_at')->label(__('fields.created_at'))
                     ->dateTime('Y-m-d H:i')
-                    ->searchable()->sortable(),
+                    ->searchable()->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('updated_at')->label(__('fields.updated_at'))
                     ->dateTime('Y-m-d H:i')
-                    ->searchable()->sortable(),
+                    ->searchable()->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 //
@@ -87,11 +91,35 @@ class ParameterResource extends Resource
                 Tables\Actions\EditAction::make()
                     ->iconButton(),
                 Tables\Actions\DeleteAction::make()
-                    ->iconButton(),
+                    ->iconButton()
+                    ->before(function (Tables\Actions\DeleteAction $action, Parameter $record) {
+                        if ($record->results()->exists()) {
+                            Notification::make()
+                                ->danger()
+                                ->title(__('other.unsuccessful_delete_title'))
+                                ->body(__('other.unsuccessful_delete_body_results'))
+                                ->persistent()
+                                ->send();
+                            $action->cancel();
+                        }
+                    })
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->before(function (Tables\Actions\DeleteBulkAction $action, Collection $records) {
+                            foreach ($records as $record) {
+                                if ($record->results()->exists()) {
+                                    Notification::make()
+                                        ->danger()
+                                        ->title(__('other.unsuccessful_delete_title'))
+                                        ->body(__('other.unsuccessful_delete_body_results'))
+                                        ->persistent()
+                                        ->send();
+                                    $action->cancel();
+                                }
+                            }
+                        }),
                 ]),
             ]);
     }

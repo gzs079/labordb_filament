@@ -7,10 +7,12 @@ use App\Filament\Resources\SamplingsiteResource\RelationManagers;
 use App\Models\Samplingsite;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
@@ -146,12 +148,35 @@ class SamplingsiteResource extends Resource
                 Tables\Actions\EditAction::make()
                     ->iconButton(),
                 Tables\Actions\DeleteAction::make()
-                    ->iconButton(),
+                ->iconButton()
+                ->before(function (Tables\Actions\DeleteAction $action, Samplingsite $record) {
+                    if ($record->samples()->exists()) {
+                        Notification::make()
+                            ->danger()
+                            ->title(__('other.unsuccessful_delete_title'))
+                            ->body(__('other.unsuccessful_delete_body_samples'))
+                            ->persistent()
+                            ->send();
+                        $action->cancel();
+                    }
+                }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->before(function (Tables\Actions\DeleteBulkAction $action, Collection $records) {
+                            foreach ($records as $record) {
+                                if ($record->samples()->exists()) {
+                                    Notification::make()
+                                        ->danger()
+                                        ->title(__('other.unsuccessful_delete_title'))
+                                        ->body(__('other.unsuccessful_delete_body_samples'))
+                                        ->persistent()
+                                        ->send();
+                                    $action->cancel();
+                                }
+                            }
+                    }),                ]),
             ]);
     }
 
