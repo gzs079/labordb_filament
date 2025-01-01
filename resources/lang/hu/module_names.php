@@ -53,4 +53,13 @@ return [
         'label' => 'Vizsgálati eredmény',
         'plural_label' => 'Vizsgálati eredmények',
     ],
+    'aquifer'=> [
+        'label' => 'Ivóvízbázis',
+        'plural_label' => 'Ivóvízbázisok',
+    ],
+    'settlement'=> [
+        'label' => 'Település',
+        'plural_label' => 'Települések',
+    ],
+
 ];

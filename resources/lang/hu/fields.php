@@ -25,6 +25,7 @@ return [
     'accreditedsamplingstatus_id' => 'Akkr. mintavétel',
     'sampler_id' => 'Mintavevő',
     'humvi_export' => 'HUMVI',
+    'humvi_export_long' => 'HUMVI exportálás',
     'type' => 'Típus',
     'laboratory' => 'Vizsgálólaboratórium',
     'accreditation_number' => 'Akkreditációs szám',
