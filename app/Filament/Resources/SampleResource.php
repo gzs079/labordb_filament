@@ -11,20 +11,24 @@ use App\Models\Sample;
 use App\Models\Samplingreason;
 use App\Models\Samplingsite;
 use App\Models\Settlement;
+use Carbon\Carbon;
 use Filament\Forms;
+use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
-use Filament\Tables\Filters\BooleanFilter;
 use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Session;
 
 class SampleResource extends Resource
 {
@@ -230,15 +234,15 @@ class SampleResource extends Resource
             ->filters([
 //PROBLÉMA: szűrők elrendezése nem jó, javítani kellene
 //PROBLÉMA szűrő ikon feletti kis szám nem szűrők számát mutatja
+
                 //HUMVI EXPORT SZŰRŐ
                 SelectFilter::make('humvi_export')
-                    ->label(__('Active Status'))
+                    ->label(__('fields.humvi_export_long'))
                     ->options([
-                        1 => __('Aktív'),
-                        0 => __('Inaktív'),
+                        1 => __('other.active'),
+                        0 => __('other.inactive'),
                     ])
-                    ->placeholder(__('Összes')),
-
+                    ->placeholder(__('other.all')),
                 //MINTAVÉTEL DÁTUMA SZŰRŐ
                 SelectFilter::make('date_sampling')
                 ->form([
@@ -311,18 +315,19 @@ class SampleResource extends Resource
                     Select::make('samplingsite')
                         ->label(__('fields.samplingsite_id'))
                         ->options(function () {
-                            return Samplingsite::all()->pluck('name_laboratory', 'name_laboratory')->unique()->sortBy(function ($item) {
+                            return Samplingsite::all()->pluck('name_laboratory', 'id')->unique()->sortBy(function ($item) {
                                 return $item;
                             });
                         })
                         ->multiple()
                         ->getOptionLabelUsing(fn (Samplingsite $record) => $record->name_laboratory)
-                ])
+                        ->preload(),
+                    ])
                 ->query(function (Builder $query, array $data): Builder {
                         return $query->when(
                         $data['samplingsite'] ?? null,
                         fn (Builder $query, $values): Builder => $query->whereHas('samplingsite', function (Builder $query) use ($values) {
-                            $query->whereIn('name_laboratory', $values);
+                            $query->whereIn('id', $values);
                         })
                     );
                 }),
@@ -338,6 +343,7 @@ class SampleResource extends Resource
                         })
                         ->multiple()
                         ->getOptionLabelUsing(fn (Samplingsite $record) => $record->modul)
+                        ->preload(),
                 ])
                 ->query(function (Builder $query, array $data): Builder {
                         return $query->when(
@@ -358,7 +364,7 @@ class SampleResource extends Resource
                             });
                         })
                         ->multiple()
-                        ->getOptionLabelUsing(fn (Samplingreason $record) => $record->reason)
+                        ->getOptionLabelUsing(fn (Samplingreason $record) => $record->reason),
                 ])
                 ->query(function (Builder $query, array $data): Builder {
                         return $query->when(
@@ -379,7 +385,7 @@ class SampleResource extends Resource
                             });
                         })
                         ->multiple()
-                        ->getOptionLabelUsing(fn (Samplingreason $record) => $record->laboratory)
+                        ->getOptionLabelUsing(fn (Laboratory $record) => $record->laboratory),
                 ])
                 ->query(function (Builder $query, array $data): Builder {
                         return $query->when(
@@ -423,4 +429,10 @@ class SampleResource extends Resource
             'edit' => Pages\EditSample::route('/{record}/edit'),
         ];
     }
+
+    protected function shouldPersistTableFiltersInSession(): bool
+    {
+        return true;
+    }
+
 }
