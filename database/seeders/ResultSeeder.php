@@ -25,7 +25,8 @@ class ResultSeeder extends Seeder
             $this->failures++;
         }
 
-        if ($this->records < 5000) {
+        //php.ini memória limit 2048M módosítás után is ~23e eredmény
+        if ($this->records < 10000) {
             $this->run();
         } else {
             print("Hibas probalkozasok: " . $this->failures . "\n");

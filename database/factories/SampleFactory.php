@@ -38,7 +38,7 @@ class SampleFactory extends Factory
             'humvimodule_id' => HumviModule::inRandomOrder()->first()->id,
             'humviresponsible_id' => HumviResponsible::inRandomOrder()->first()->id,
             'samplingtype_id' => SamplingType::inRandomOrder()->first()->id,
-            'date_sampling' => $this->faker->date('Y-m-d', '2000-01-01'),
+            'date_sampling' => $this->faker->dateTimeInInterval('-5 year','now')->format('Y-m-d'),
             'laboratory_id' => Laboratory::inRandomOrder()->first()->id,
             'date_samplereceipt' => $this->faker->optional()->date('Y-m-d'),
             'date_analyses_start' => $this->faker->optional()->date('Y-m-d'),
