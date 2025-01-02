@@ -27,6 +27,7 @@ class ListSamples extends ListRecords
             \app\Filament\Resources\SampleResource\Widgets\SampleModulChart::class,
             \app\Filament\Resources\SampleResource\Widgets\SampleSamplingreasonChart::class,
             \app\Filament\Resources\SampleResource\Widgets\SampleAquiferChart::class,
+            \app\Filament\Resources\SampleResource\Widgets\SampleLaboratoryChart::class,
         ];
     }
 
