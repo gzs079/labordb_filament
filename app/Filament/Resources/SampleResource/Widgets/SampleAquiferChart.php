@@ -35,10 +35,6 @@ class SampleAquiferChart extends ChartWidget
         $index=0;
         foreach ($items as $item) {
             array_push($label, $item->aquifer);
-/*            array_push($data, $this->getPageTableQuery()
-                                    ->where('humvimodule_id', $item->id)
-                                    ->count());
-*/
             array_push($data, $this->getPageTableQuery()
                                     ->whereHas(
                                         'samplingsite',
@@ -48,7 +44,7 @@ class SampleAquiferChart extends ChartWidget
                                         )
                                     )
                                     ->count());
-            array_push($backgroundColor, generateColor($index)['total'] < count($items) ? generateHSLColor($index, count($items)) : generateColor($index)['color']);
+            array_push($backgroundColor, generateColor(0)['total'] < count($items) ? generateHSLColor($index, count($items)) : generateColor($index)['color']);
             $index++;
         }
 
