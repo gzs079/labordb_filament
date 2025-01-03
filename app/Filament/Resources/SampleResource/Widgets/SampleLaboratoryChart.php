@@ -32,7 +32,7 @@ class SampleLaboratoryChart extends ChartWidget
         $backgroundColor=[];
 
         $index=0;
-        //collection kulcs-érték párjainak lekérdezése $laboratory => $name .....
+        //collection kulcs-érték párjainak lekérdezése $laboratory => $name formátumban.....
         foreach ($items as $laboratory => $name) {
             array_push($label, $name);
             array_push($data, $this->getPageTableQuery()
@@ -63,4 +63,25 @@ class SampleLaboratoryChart extends ChartWidget
     {
         return 'pie';
     }
+
+    protected static ?array $options = [
+        'scales' => [
+            'y' => [
+                'grid' => [
+                    'display' => false,
+                ],
+                'ticks' => [
+                    'display' => false,
+                ],
+            ],
+            'x' => [
+                'grid' => [
+                    'display' => false,
+                ],
+                'ticks' => [
+                    'display' => false,
+                ],
+            ],
+        ],
+    ];
 }

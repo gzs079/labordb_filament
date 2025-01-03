@@ -57,4 +57,25 @@ class SampleSamplingreasonChart extends ChartWidget
     {
         return 'pie';
     }
+
+    protected static ?array $options = [
+        'scales' => [
+            'y' => [
+                'grid' => [
+                    'display' => false,
+                ],
+                'ticks' => [
+                    'display' => false,
+                ],
+            ],
+            'x' => [
+                'grid' => [
+                    'display' => false,
+                ],
+                'ticks' => [
+                    'display' => false,
+                ],
+            ],
+        ],
+    ];
 }
