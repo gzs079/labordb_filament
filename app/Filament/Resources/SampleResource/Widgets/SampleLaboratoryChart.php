@@ -16,7 +16,7 @@ class SampleLaboratoryChart extends ChartWidget
         return __('module_names.laboratory.label');
     }
 
-        protected static ?string $pollingInterval = '100s';
+    //protected static ?string $pollingInterval = '10s';
 
     protected int | string | array $columnSpan = 1;
 

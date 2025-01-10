@@ -29,6 +29,10 @@ class ListSamples extends ListRecords
             \app\Filament\Resources\SampleResource\Widgets\SampleAquiferChart::class,
             \app\Filament\Resources\SampleResource\Widgets\SampleLaboratoryChart::class,
             \app\Filament\Resources\SampleResource\Widgets\SampleSettlementChart::class,
+            \app\Filament\Resources\SampleResource\Widgets\SampleParameterChart::class,
+            \app\Filament\Resources\SampleResource\Widgets\SampleSamplingDateChart::class,
+            \app\Filament\Resources\SampleResource\Widgets\SampleResultsNumbereChart::class,
+
         ];
     }
 
