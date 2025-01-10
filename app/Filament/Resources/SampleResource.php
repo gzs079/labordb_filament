@@ -36,6 +36,8 @@ class SampleResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    protected static ?string $navigationGroup = 'Watersamples';
+
     public static function getNavigationGroup(): string
     {
         return __('module_names.navigation_groups.watersamples');

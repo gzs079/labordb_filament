@@ -21,6 +21,8 @@ class ParameterResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
 
+    protected static ?string $navigationGroup = 'Administration';
+    
     public static function getNavigationGroup(): string
     {
         return __('module_names.navigation_groups.administration');

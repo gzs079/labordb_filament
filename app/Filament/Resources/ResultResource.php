@@ -31,6 +31,8 @@ class ResultResource extends Resource
         static::$callFrom = $data;
     }
 
+    protected static ?string $navigationGroup = 'Watersamples';
+
     public static function getNavigationGroup(): string
     {
         return __('module_names.navigation_groups.watersamples');
