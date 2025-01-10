@@ -3,12 +3,9 @@
 namespace App\Filament\Resources\SampleResource\Widgets;
 
 use App\Filament\Resources\SampleResource\Pages\ListSamples;
-use App\Models\Sample;
 use Carbon\Carbon;
 use Filament\Widgets\ChartWidget;
 use Filament\Widgets\Concerns\InteractsWithPageTable;
-use Flowframe\Trend\Trend;
-use Flowframe\Trend\TrendValue;
 
 class SampleSamplingDateChart extends ChartWidget
 {
@@ -66,35 +63,6 @@ class SampleSamplingDateChart extends ChartWidget
                 ],
             ],
             'labels' => $label,
-        ];
-    }
-
-
-/************
-*   Filament minta alapján
-*   InteractsWithPageTable tulajdonságot nem kezeli... csak mintának maradt meg
-*   https://filamentphp.com/docs/3.x/widgets/charts#overview
-*   https://github.com/Flowframe/laravel-trend
-************/
-    protected function getData_NEMJO(): array
-    {
-        $data = Trend::model(Sample::class)
-        ->dateColumn('date_sampling')
-        ->between(
-            start:  Carbon::now()->subYears(4),//now()->startOfYear(),
-            end: now()->endOfYear(),
-        )
-        ->perYear()
-        ->count();
-
-        return [
-            'datasets' => [
-                [
-                    'label' => __('other.samplingdategraphx'),
-                    'data' => $data->map(fn (TrendValue $value) => $value->aggregate),
-                ],
-            ],
-            'labels' => $data->map(fn (TrendValue $value) => $value->date),
         ];
     }
 
