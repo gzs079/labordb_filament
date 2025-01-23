@@ -1,0 +1,18 @@
+.fi-header-heading {
+}
+
+.fi-header {
+}
+
+.fi-main {
+    /*border:5px double black ;*/
+}
+
+.fi-page {
+    /*border:5px double black;*/
+    min-height: 100%;
+}
+
+.custom-content {
+    border:3px double blueviolet;
+}

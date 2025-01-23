@@ -188,6 +188,7 @@ class ResultResource extends Resource
 //            'create' => Pages\CreateResult::route('/create'),
 //            'view' => Pages\ViewResult::route('/{record}'),
 //            'edit' => Pages\EditResult::route('/{record}/edit'),
+            'overview' => Pages\ResultsOverview::route('filament.resources.result-resource.pages.results-overview'),
         ];
     }
 }
