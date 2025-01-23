@@ -3,6 +3,7 @@
 return [
     'navigation_groups' => [
       'administration' => 'Administration',
+      'watersamples' => 'Water samples',
     ],
     'accreditedsamplingstatus' => [
       'label' => 'Device type',
@@ -16,5 +17,8 @@ return [
     'label' => 'HUMVI responsible',
     'plural_label' => 'HUMVI responsibles',
   ],
-
+  'drinkingwatersamples' => [
+    'label' => 'Drinkingwater',
+    'plural_label' => 'Drinking waters',
+  ],
   ];

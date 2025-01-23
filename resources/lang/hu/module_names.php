@@ -4,6 +4,7 @@ return [
     'navigation_groups' => [
         'administration' => 'Adattáblák kezelése',
         'watersamples' => 'Vízminták kezelése',
+    	'usefullinks' => 'Hasznos linkek',
     ],
     'accreditedsamplingstatus' => [
         'label' => 'Akkreditált mintavétel státusza',
@@ -61,5 +62,4 @@ return [
         'label' => 'Település',
         'plural_label' => 'Települések',
     ],
-
 ];
