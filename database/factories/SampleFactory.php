@@ -50,6 +50,7 @@ class SampleFactory extends Factory
             'accreditedsamplingstatus_id' => AccreditedSamplingStatus::inRandomOrder()->first()->id,
             'sampler_id' => Sampler::inRandomOrder()->first()->id,
             'humvi_export' => $this->faker->boolean(),
+            'sample_status' => 'rögzítve',
             'created_at' => now(),
             'updated_at' => now(),
         ];

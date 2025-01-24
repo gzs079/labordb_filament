@@ -29,6 +29,7 @@ return new class extends Migration
             $table->foreignId('accreditedsamplingstatus_id')->nullable()->constrained()->restrictOnDelete();
             $table->foreignId('sampler_id')->nullable()->constrained()->restrictOnDelete();
             $table->boolean('humvi_export')->default(false);
+            $table->enum('sample_status',['rögzítve','validálva']);
             $table->timestamps();
         });
     }
