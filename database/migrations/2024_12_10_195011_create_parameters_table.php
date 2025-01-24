@@ -16,8 +16,12 @@ return new class extends Migration
             $table->string('par_code', length:25)->unique();
             $table->string('description_humvi', length:75);
             $table->string('description_labor', length:75);
-            $table->string('parametric_value', length:75)->nullable();
-            $table->string('parametric_value_type', length:25)->nullable();
+            $table->string('parametric_value', length:255)->nullable();
+            $table->enum('parametric_value_type',['határérték','parametrikus érték'])->nullable();
+            $table->double('parametric_value_min')->nullable();
+            $table->double('parametric_value_max')->nullable();
+            $table->foreignId('unit_id')->constrained()->restrictOnDelete();
+            $table->enum('parameter_group',['Indikátor','Kémia','Mikrobiológia','Mikroszkópos biológia','Peszticidek','Radiológia','Szerves mikroszennyezők']);
             $table->timestamps();
         });
     }
