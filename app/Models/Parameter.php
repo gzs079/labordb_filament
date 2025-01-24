@@ -13,7 +13,11 @@ class Parameter extends Model
         'description_humvi',
         'description_labor',
         'parametric_value',
-        'parametric_value_type'
+        'parametric_value_type',
+        'parametric_value_min',
+        'parametric_value_max',
+        'unit_id',
+        'parameter_group'
     ];
 
     public function results()

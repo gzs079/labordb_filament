@@ -31,6 +31,10 @@ class Sample extends Model
         'humvi_export',
     ];
 
+    protected $guarded = [
+        'sample_status',
+    ];
+
     protected $casts = [
         'date_sampling' => 'date',
         'date_samplereceipt' => 'date',
