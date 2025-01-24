@@ -18,9 +18,9 @@ return new class extends Migration
             $table->unique(['sample_id', 'parameter_id']);
             $table->foreignId('unit_id')->constrained()->restrictOnDelete();
             $table->string('value', length:25);
-            $table->float('loq')->nullable();
-            $table->float('maxrange')->nullable();
-            $table->float('valueassigned')->nullable();
+            $table->double('loq')->nullable();
+            $table->double('maxrange')->nullable();
+            $table->double('valueassigned')->nullable();
             $table->timestamps();
         });
     }
