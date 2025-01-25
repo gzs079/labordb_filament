@@ -30,10 +30,11 @@ class ResultFactory extends Factory
     public function definition(): array
     {
         $value = $this->generateValue();
+        $parameter = Parameter::inRandomOrder()->first()->id;
         return [
             'sample_id' => Sample::inRandomOrder()->first()->id,
-            'parameter_id' => Parameter::inRandomOrder()->first()->id,
-            'unit_id' => Unit::inRandomOrder()->first()->id,
+            'parameter_id' => $parameter,
+            'unit_id' => Parameter::where('id',$parameter)->firstOrFail()->unit_id,
             'value' => $value,
             'loq' => calculate_loq($value),
             'maxrange' => calculate_maxrange($value),
