@@ -29,9 +29,6 @@ class Sample extends Model
         'accreditedsamplingstatus_id',
         'sampler_id',
         'humvi_export',
-    ];
-
-    protected $guarded = [
         'sample_status',
     ];
 

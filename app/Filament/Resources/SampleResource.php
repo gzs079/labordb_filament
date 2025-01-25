@@ -11,6 +11,7 @@ use App\Models\Sample;
 use App\Models\Samplingreason;
 use App\Models\Samplingsite;
 use App\Models\Settlement;
+use App\Enums\SampleStatuses;
 use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Components\Checkbox;
@@ -25,8 +26,10 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
+use Filament\Tables\Actions\BulkAction;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Session;
 
@@ -171,6 +174,8 @@ class SampleResource extends Resource
                     ->searchable()->sortable(),
                 Tables\Columns\CheckboxColumn::make('humvi_export')->label(__('fields.humvi_export'))
                     ->searchable()->sortable()->disabled(),
+                Tables\Columns\TextColumn::make('sample_status')->label(__('fields.sample_status'))
+                    ->searchable()->sortable()->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('sample_lab_id')->label(__('fields.sample_lab_id'))
                     ->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('humvimodule.modul')->label(__('fields.humvimodule_id'))
@@ -245,6 +250,10 @@ class SampleResource extends Resource
                         0 => __('other.inactive'),
                     ])
                     ->placeholder(__('other.all')),
+                //MINTA STÁTUSZA SZŰRŐ
+                SelectFilter::make('sample_status')
+                    ->label(__('fields.sample_status'))
+                    ->options(SampleStatuses::class),
                 //MINTAVÉTEL DÁTUMA SZŰRŐ
                 SelectFilter::make('date_sampling')
                 ->form([
@@ -288,7 +297,7 @@ class SampleResource extends Resource
                 //TELEPÜLÉS SZŰRŐ
                 SelectFilter::make('settlement')
                 ->form([
-//  PROBLÉMA:   PRÓBA település LISTA SZŰKÍTÉSÉRE PRÓBÁLKOZÁSOK NEM MŰKÖDTEK.
+//  PROBLÉMA:   település LISTA SZŰKÍTÉSÉRE PRÓBÁLKOZÁSOK NEM MŰKÖDTEK.
 //              ADATBÁZIS MÓDOSÍTÁS UTÁN MÁR ADATOK IS HIÁNYOZNAK... gyakorlatban átgondolást igényel, nem biztos hogy működne
 //              (legalább egy település -> több vízbázis)
                     Select::make('settlement')
@@ -411,7 +420,18 @@ class SampleResource extends Resource
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                    Tables\Actions\BulkAction::make('validate_sample')
+                        ->label(__('other.validate_sample'))
+                        ->icon('heroicon-o-check')
+                        ->color('success')
+                        ->requiresConfirmation()
+                        ->action(function (Collection $records) {
+                            foreach ($records as $record) {
+                                $record->update(['sample_status' => SampleStatuses::Validated]);
+                            }
+                        })
+                        ->deselectRecordsAfterCompletion(),  
+                    ]),
             ]);
     }
 
