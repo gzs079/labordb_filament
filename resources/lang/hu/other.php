@@ -13,5 +13,5 @@ return [
     'resultsnumbergraphx' => 'Vizsgálatok száma',
     'y_axis_auto'=>'automatikus',
     'y_axis_fromzero'=>'y-tengely 0-tól',
-
+    'validate_sample' => 'Minta validálása',
 ];
