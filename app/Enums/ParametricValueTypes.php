@@ -2,8 +2,16 @@
 
 namespace App\Enums;
 
-enum ParametricValueTypes: string
+use Filament\Support\Contracts\HasLabel;
+
+enum ParametricValueTypes: string implements HasLabel
 {
-    case Limit = 'határérték';
-    case Parametric = 'parametrikus érték';
+    case LimitValue = "határérték";
+    case ParametricValue = "parametrikus érték";
+
+    public function getLabel(): ?string
+    {
+        return $this->value;
+    }
 }
+

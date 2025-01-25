@@ -2,8 +2,15 @@
 
 namespace App\Enums;
 
-enum SampleStauses: string
+use Filament\Support\Contracts\HasLabel;
+
+enum SampleStauses: string implements HasLabel
 {
     case Recorded = 'rögzítve';
     case Validated  = 'validálva';
+
+    public function getLabel(): ?string
+    {
+        return $this->value;
+    }
 }

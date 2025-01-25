@@ -2,7 +2,9 @@
 
 namespace App\Enums;
 
-enum ParameterGroups: string
+use Filament\Support\Contracts\HasLabel;
+
+enum ParameterGroups: string implements HasLabel
 {
     case Indicator = 'Indikátor';
     case Chemical = 'Kémia';
@@ -11,4 +13,11 @@ enum ParameterGroups: string
     case Pesticides = 'Peszticidek';
     case Radiological = 'Radiológia';
     case OrganicMicropollutants = 'Szerves mikroszennyezők';
+    public function getLabel(): ?string
+    {
+        return $this->value;
+    }
+
 }
+
+ 
