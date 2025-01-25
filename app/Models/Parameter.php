@@ -24,4 +24,9 @@ class Parameter extends Model
     {
         return $this->hasMany(Result::class, 'parameter_id');
     }
+
+    public function unit()
+    {
+        return $this->belongsTo(Unit::class, 'unit_id');
+    }
 }

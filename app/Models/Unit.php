@@ -18,4 +18,9 @@ class Unit extends Model
     {
         return $this->hasMany(Result::class, 'unit_id');
     }
+
+    public function parmeters()
+    {
+        return $this->hasMany(Parameter::class, 'unit_id');
+    }
 }
