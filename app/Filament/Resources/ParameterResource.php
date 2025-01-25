@@ -2,11 +2,14 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\ParameterGroups;
+use App\Enums\ParametricValueTypes;
 use App\Filament\Resources\ParameterResource\Pages;
 use App\Filament\Resources\ParameterResource\RelationManagers;
 use App\Models\Parameter;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
@@ -14,6 +17,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Database\Eloquent\Model;
 
 class ParameterResource extends Resource
 {
@@ -53,9 +57,26 @@ class ParameterResource extends Resource
                     ->required()
                     ->maxLength(75),
                 Forms\Components\TextInput::make('parametric_value')->label(__('fields.parametric_value'))
-                    ->maxLength(75),
-                Forms\Components\TextInput::make('parametric_value_type')->label(__('fields.parametric_value_type'))
-                    ->maxLength(25),
+                    ->maxLength(255),
+                Forms\Components\Select::make('parametric_value_type')
+                    ->label(__('fields.parametric_value_type'))
+                    ->options(ParametricValueTypes::class),
+                Forms\Components\TextInput::make('parametric_value_min')->label(__('fields.parametric_value_min'))
+                     ->numeric(),
+                Forms\Components\TextInput::make('parametric_value_max')->label(__('fields.parametric_value_max'))
+                    ->numeric(),
+                Forms\Components\Select::make('unit_id')->label(__('fields.unit_id'))
+                    ->required()
+                    ->relationship('Unit', 'unit_code')
+                    ->searchable()
+                    ->getOptionLabelFromRecordUsing(fn (Model $record) => "{$record->unit_code} - {$record->description_labor}")
+                    ->preload()
+                    ->createOptionForm(fn(Form $form) => UnitResource::form($form))
+                    ->editOptionForm(fn(Form $form) => UnitResource::form($form)),
+                Forms\Components\Select::make('parameter_group')
+                    ->label(__('fields.parameter_group'))
+                    ->options(ParameterGroups::class)
+                    ->required(),
             ])->columns(1);
     }
 
@@ -68,12 +89,18 @@ class ParameterResource extends Resource
                 Tables\Columns\TextColumn::make('par_code')->label(__('fields.par_code'))
                     ->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('description_humvi')->label(__('fields.description_humvi'))
-                    ->searchable()->sortable(),
+                    ->searchable()->sortable()->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('description_labor')->label(__('fields.description_labor'))
                     ->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('parametric_value')->label(__('fields.parametric_value'))
                     ->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('parametric_value_min')->label(__('fields.parametric_value_min'))
+                    ->searchable()->sortable()->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('parametric_value_max')->label(__('fields.parametric_value_max'))
+                    ->searchable()->sortable()->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('parametric_value_type')->label(__('fields.parametric_value_type'))
+                    ->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('unit.description_labor')->label(__('fields.unit_id'))
                     ->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('created_at')->label(__('fields.created_at'))
                     ->dateTime('Y-m-d H:i')
