@@ -102,6 +102,8 @@ class ParameterResource extends Resource
                     ->searchable()->sortable(),
                 Tables\Columns\TextColumn::make('unit.description_labor')->label(__('fields.unit_id'))
                     ->searchable()->sortable(),
+                Tables\Columns\TextColumn::make('parameter_group')->label(__('fields.parameter_group'))
+                    ->searchable()->sortable()->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')->label(__('fields.created_at'))
                     ->dateTime('Y-m-d H:i')
                     ->searchable()->sortable()
