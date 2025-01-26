@@ -6,6 +6,7 @@ use App\Filament\Resources\ResultResource;
 use App\Models\Aquifer;
 use App\Models\Humvimodule;
 use App\Models\Laboratory;
+use App\Models\Parameter;
 use App\Models\Result;
 use App\Models\Samplingreason;
 use App\Models\Samplingsite;
@@ -94,8 +95,20 @@ class ResultsOverview extends Page implements HasForms, HasTable
 
             ])
             ->filters([
+                //PARAMÉTER SZŰRŐ
+                SelectFilter::make('parameter_id')
+                    ->form([
+                        Select::make('parameter_id')
+                            ->label(__('fields.parameter_id'))
+                            ->options(function () {
+                                return Parameter::all()->pluck('description_labor','id')->toArray();
+                            })
+                            ->default(Parameter::where('description_humvi','pH')->firstOrFail()->id)
+                            ->preload(),
+                        ])
+                    ->query(fn (Builder $query, array $data): Builder => $query->where('parameter_id', $data)),
                 //MINTAVÉTEL DÁTUMA SZŰRŐ
-                SelectFilter::make('date_sampling')
+                SelectFilter::make('sample.date_sampling')
                     ->form([
                         DatePicker::make('sampled_from')->label(__('fields.date_sampling_from')),
                         DatePicker::make('sampled_until')->label(__('fields.date_sampling_until')),
@@ -104,11 +117,15 @@ class ResultsOverview extends Page implements HasForms, HasTable
                         return $query
                             ->when(
                                 $data['sampled_from'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('date_sampling', '>=', $date),
+                                fn (Builder $query, $date): Builder => $query->whereHas(
+                                    'sample',
+                                    fn(Builder $query) => $query->whereDate('date_sampling', '>=', $date)),
                             )
                             ->when(
                                 $data['sampled_until'],
-                                fn (Builder $query, $date): Builder => $query->whereDate('date_sampling', '<=', $date),
+                                fn (Builder $query, $date): Builder => $query->whereHas(
+                                    'sample',
+                                    fn(Builder $query) => $query->whereDate('date_sampling', '<=', $date)),
                             );
                     }),
                 //IVÓVÍZBÁZIS SZŰRŐ
@@ -126,40 +143,43 @@ class ResultsOverview extends Page implements HasForms, HasTable
                         if (!empty($data['aquifer']))
                         {
                             $query->whereHas(
-                                'samplingsite',
+                                'sample',
                                 fn (Builder $query) => $query->whereHas(
-                                    'aquifer',
-                                    fn (Builder $query) => $query->whereIn('id', $data['aquifer'])
+                                    'samplingsite',
+                                    fn (Builder $query) => $query->whereHas(
+                                        'aquifer',
+                                        fn (Builder $query) => $query->whereIn('id', $data['aquifer'])
+                                    )
                                 )
                             );
                         }
                     }),
                 //TELEPÜLÉS SZŰRŐ
                 SelectFilter::make('settlement')
-                ->form([
-//  PROBLÉMA:   PRÓBA település LISTA SZŰKÍTÉSÉRE PRÓBÁLKOZÁSOK NEM MŰKÖDTEK.
-//              ADATBÁZIS MÓDOSÍTÁS UTÁN MÁR ADATOK IS HIÁNYOZNAK... gyakorlatban átgondolást igényel, nem biztos hogy működne
-//              (legalább egy település -> több vízbázis)
-                    Select::make('settlement')
-                        ->label(__('fields.settlement'))
-                        ->options(function () {
-                            return Settlement::all()->pluck('settlement', 'id')->toArray();
-                        })
-                        ->multiple()
-                        ->preload(),
-                ])
-                ->query(function (Builder $query, array $data) {
-                    if (!empty($data['settlement']))
-                    {
-                        $query->whereHas(
-                            'samplingsite',
-                            fn (Builder $query) => $query->whereHas(
-                                'settlement',
-                                fn (Builder $query) => $query->whereIn('id', $data['settlement'])
-                            )
-                        );
-                    }
-                }),
+                    ->form([
+                        Select::make('settlement')
+                            ->label(__('fields.settlement'))
+                            ->options(function () {
+                                return Settlement::all()->pluck('settlement', 'id')->toArray();
+                            })
+                            ->multiple()
+                            ->preload(),
+                    ])
+                    ->query(function (Builder $query, array $data) {
+                        if (!empty($data['settlement']))
+                        {
+                            $query->whereHas(
+                                'sample',
+                                fn (Builder $query) => $query->whereHas(
+                                    'samplingsite',
+                                    fn (Builder $query) => $query->whereHas(
+                                        'settlement',
+                                        fn (Builder $query) => $query->whereIn('id', $data['settlement'])
+                                    )
+                                )
+                            );
+                        }
+                    }),
                 //MINTAVÉTEL HELYE SZŰRŐ
                 SelectFilter::make('samplingsite')
                 ->form([
@@ -174,13 +194,14 @@ class ResultsOverview extends Page implements HasForms, HasTable
                         ->getOptionLabelUsing(fn (Samplingsite $record) => $record->name_laboratory)
                         ->preload(),
                     ])
-                ->query(function (Builder $query, array $data): Builder {
-                        return $query->when(
-                        $data['samplingsite'] ?? null,
-                        fn (Builder $query, $values): Builder => $query->whereHas('samplingsite', function (Builder $query) use ($values) {
-                            $query->whereIn('id', $values);
-                        })
-                    );
+                ->query(function (Builder $query, array $data) {
+                        if (!empty($data['samplingsite']))
+                        {
+                            $query->whereHas(
+                                'sample',
+                                fn (Builder $query) => $query->whereIn('samplingsite_id', $data['samplingsite'])
+                            );
+                        }
                 }),
                 //MODUL SZŰRŐ
                 SelectFilter::make('modul')
@@ -188,7 +209,7 @@ class ResultsOverview extends Page implements HasForms, HasTable
                     Select::make('modul')
                         ->label(__('fields.humvimodule_id'))
                         ->options(function () {
-                            return Humvimodule::all()->pluck('modul', 'modul')->unique()->sortBy(function ($item) {
+                            return Humvimodule::all()->pluck('modul', 'id')->unique()->sortBy(function ($item) {
                                 return $item;
                             });
                         })
@@ -196,13 +217,14 @@ class ResultsOverview extends Page implements HasForms, HasTable
                         ->getOptionLabelUsing(fn (Samplingsite $record) => $record->modul)
                         ->preload(),
                 ])
-                ->query(function (Builder $query, array $data): Builder {
-                        return $query->when(
-                        $data['modul'] ?? null,
-                        fn (Builder $query, $values): Builder => $query->whereHas('humvimodule', function (Builder $query) use ($values) {
-                            $query->whereIn('modul', $values);
-                        })
-                    );
+                ->query(function (Builder $query, array $data) {
+                    if (!empty($data['modul']))
+                    {
+                        $query->whereHas(
+                            'sample',
+                            fn (Builder $query) => $query->whereIn('humvimodule_id', $data['modul'])
+                        );
+                    }
                 }),
                 //MINTAVÉTEL OKA SZŰRŐ
                 SelectFilter::make('samplingreason')
@@ -210,22 +232,24 @@ class ResultsOverview extends Page implements HasForms, HasTable
                     Select::make('samplingreason')
                         ->label(__('fields.samplingreason_id'))
                         ->options(function () {
-                            return Samplingreason::all()->pluck('reason', 'reason')->unique()->sortBy(function ($item) {
+                            return Samplingreason::all()->pluck('reason', 'id')->unique()->sortBy(function ($item) {
                                 return $item;
                             });
                         })
                         ->multiple()
                         ->getOptionLabelUsing(fn (Samplingreason $record) => $record->reason),
                 ])
-                ->query(function (Builder $query, array $data): Builder {
-                        return $query->when(
-                        $data['samplingreason'] ?? null,
-                        fn (Builder $query, $values): Builder => $query->whereHas('samplingreason', function (Builder $query) use ($values) {
-                            $query->whereIn('reason', $values);
-                        })
-                    );
+                ->query(function (Builder $query, array $data) {
+                    if (!empty($data['samplingreason']))
+                    {
+                        $query->whereHas(
+                            'sample',
+                            fn (Builder $query) => $query->whereIn('samplingreason_id', $data['samplingreason'])
+                        );
+                    }
                 }),
                 //VIZSGÁLÓLABOR SZŰRŐ
+                //SZŰRÉS CSAK NÉV ALAPJÁN, MERT A TÁBLÁBAN EGY NÉV TÖBB AKKREDITÁLT STÁTUSSZAL IS SZEREPELHET
                 SelectFilter::make('laboratory')
                 ->form([
                     Select::make('laboratory')
@@ -238,13 +262,19 @@ class ResultsOverview extends Page implements HasForms, HasTable
                         ->multiple()
                         ->getOptionLabelUsing(fn (Laboratory $record) => $record->laboratory),
                 ])
-                ->query(function (Builder $query, array $data): Builder {
-                        return $query->when(
-                        $data['laboratory'] ?? null,
-                        fn (Builder $query, $values): Builder => $query->whereHas('laboratory', function (Builder $query) use ($values) {
-                            $query->whereIn('name', $values);
-                        })
-                    );
+
+
+                ->query(function (Builder $query, array $data) {
+                    if (!empty($data['laboratory']))
+                    {
+                        $query->whereHas(
+                            'sample',
+                            fn (Builder $query) => $query->whereHas(
+                                'laboratory',
+                                fn (Builder $query) => $query->whereIn('name', $data['laboratory'])
+                            )
+                        );
+                    }
                 }),
             ] , layout: FiltersLayout::AboveContentCollapsible)
 //PROBLÉMA: hiddenFilterIndicators(false) esetén vagy ha nincs megadva, akkor csak

@@ -343,6 +343,8 @@ class SampleResource extends Resource
                     );
                 }),
                 //MODUL SZŰRŐ
+//PROBLÉMA: modul és mintavétel oka szűrők nem ID alapján működnek. ResultsOverview.php-hoz hasonlóan lehetne egységesíten
+//(Vizsgálólabor szűrő nem! Egy névvel több akkreditált státusz is lehet!)
                 SelectFilter::make('modul')
                 ->form([
                     Select::make('modul')
@@ -430,7 +432,7 @@ class SampleResource extends Resource
                                 $record->update(['sample_status' => SampleStatuses::Validated]);
                             }
                         })
-                        ->deselectRecordsAfterCompletion(),  
+                        ->deselectRecordsAfterCompletion(),
                     ]),
             ]);
     }
